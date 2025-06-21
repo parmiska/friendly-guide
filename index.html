@@ -1,23 +1,45 @@
 <!DOCTYPE html>
-<html lang="uk"></html>
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мій Вебсайт</title>
-    <link rel="stylesheet" href="style.css">
+  <title>Word Saver</title>
+  <meta charset="UTF-8">
 </head>
 <body>
-    <header>
-        <h1>Ласкаво просимо на мій вебсайт</h1>
-    </header>
-    <main>
-        <section>
-            <h2>Про нас</h2>
-            <p>Це базовий шаблон HTML для вашого вебсайту.</p>
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2025 Мій Вебсайт</p>
-    </footer>
+  <h1>Введи слово:</h1>
+  <input id="wordInput" placeholder="твоє слово" />
+  <button onclick="saveWord()">Зберегти</button>
+
+  <h2>Останнє збережене слово:</h2>
+  <p id="savedWord">Завантаження...</p>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+  <script>
+    // 🔧 СЮДИ ВСТАВ СВОЇ НАЛАШТУВАННЯ FIREBASE
+  const firebaseConfig = {
+  apiKey: "AIzaSyDic5s4o8BZ8w1MGN0bTuA7QZFpU1l8094",
+  authDomain: "simple-word-app.firebaseapp.com",
+  databaseURL: "https://simple-word-app-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "simple-word-app",
+  storageBucket: "simple-word-app.firebasestorage.app",
+  messagingSenderId: "1029854852560",
+  appId: "1:1029854852560:web:e21bce1721681e8c52f5d5"
+};
+
+    // Ініціалізація
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    function saveWord() {
+      const word = document.getElementById('wordInput').value;
+      db.ref('word').set(word);
+    }
+
+    db.ref('word').on('value', (snapshot) => {
+      document.getElementById('savedWord').innerText = snapshot.val() || '(пусто)';
+    });
+  </script>
 </body>
 </html>
