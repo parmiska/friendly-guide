@@ -1,16 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Word Saver</title>
-  <meta charset="UTF-8">
+  <title>Коментарі</title>
+  <meta charset="UTF-8" />
 </head>
 <body>
-  <h1>Введи слово:</h1>
-  <input id="wordInput" placeholder="твоє слово" />
-  <button onclick="saveWord()">Зберегти</button>
+  <h1>Залиш коментар:</h1>
+  <input id="author" placeholder="Твоє ім'я" />
+  <br /><br />
+  <textarea id="commentText" placeholder="Текст коментаря"></textarea>
+  <br />
+  <button onclick="addComment()">Додати коментар</button>
 
-  <h2>Останнє збережене слово:</h2>
-  <p id="savedWord">Завантаження...</p>
+  <h2>Всі коментарі:</h2>
+  <ul id="commentsList"></ul>
 
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -28,17 +31,43 @@
   appId: "1:1029854852560:web:e21bce1721681e8c52f5d5"
 };
 
-    // Ініціалізація
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    function saveWord() {
-      const word = document.getElementById('wordInput').value;
-      db.ref('word').set(word);
+    const commentsRef = db.ref('comments');
+
+    function addComment() {
+      const author = document.getElementById('author').value.trim();
+      const text = document.getElementById('commentText').value.trim();
+      if (!author || !text) {
+        alert("Введи ім'я і текст коментаря");
+        return;
+      }
+      const newCommentRef = commentsRef.push();
+      newCommentRef.set({
+        author,
+        text,
+        timestamp: Date.now()
+      });
+      document.getElementById('author').value = '';
+      document.getElementById('commentText').value = '';
     }
 
-    db.ref('word').on('value', (snapshot) => {
-      document.getElementById('savedWord').innerText = snapshot.val() || '(пусто)';
+    commentsRef.on('value', (snapshot) => {
+      const commentsList = document.getElementById('commentsList');
+      commentsList.innerHTML = '';
+      const comments = snapshot.val();
+      if (!comments) {
+        commentsList.innerHTML = '<li>Коментарів поки немає.</li>';
+        return;
+      }
+      // Сортуємо коментарі за часом (від старих до нових)
+      const sortedComments = Object.entries(comments).sort((a, b) => a[1].timestamp - b[1].timestamp);
+      for (const [key, comment] of sortedComments) {
+        const li = document.createElement('li');
+        li.textContent = `${comment.author}: ${comment.text}`;
+        commentsList.appendChild(li);
+      }
     });
   </script>
 </body>
